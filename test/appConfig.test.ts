@@ -3,10 +3,14 @@ import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
 const configPath = decodeURIComponent(new URL('../app.json', import.meta.url).pathname);
+const easConfigPath = decodeURIComponent(new URL('../eas.json', import.meta.url).pathname);
 const config = JSON.parse(readFileSync(configPath, 'utf8'));
+const easConfig = JSON.parse(readFileSync(easConfigPath, 'utf8'));
 
 test('sets required iOS release metadata for EAS and App Store Connect', () => {
   assert.equal(config.expo.ios.bundleIdentifier, 'com.thuemmlerai.parkingremindertimer');
   assert.equal(config.expo.ios.infoPlist.ITSAppUsesNonExemptEncryption, false);
   assert.equal(config.expo.ios.buildNumber, undefined);
+  assert.equal(easConfig.submit.production.ios.ascAppId, '6770088501');
+  assert.equal(easConfig.submit.production.ios.appleTeamId, 'YDNC3Z7M6B');
 });
