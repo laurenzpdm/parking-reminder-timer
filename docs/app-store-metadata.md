@@ -36,11 +36,11 @@ Pro features:
 - Unlimited parking sessions
 - Smart pre-expiry reminder presets
 - Rich ticket-free streak cards
-- Annual plan with a 7-day free trial
+- Weekly plan with a 7-day free trial and lower annual price
 
 Subscriptions:
-- Weekly Pro: `parking_reminder_timer_weekly`, no trial
-- Annual Pro: `parking_reminder_timer_annual`, 7-day free trial
+- Weekly Pro: `parking_reminder_timer_weekly`, 7-day free trial, planned price .99 per week
+- Annual Pro: `parking_reminder_timer_annual`, no trial, planned price .99 per year
 
 Review notes:
 This app does not pay for parking, reserve parking, or guarantee that users avoid fines. It helps users save their own timer and reminder information.

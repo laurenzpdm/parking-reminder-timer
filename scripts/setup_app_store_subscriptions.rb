@@ -13,19 +13,19 @@ PRODUCTS = [
     product_id: "parking_reminder_timer_weekly",
     reference_name: "Parking Reminder Timer Weekly",
     duration: "1w",
-    trial: nil,
-    tier: 3,
+    trial: "1w",
+    tier: 49,
     name: "Parking Reminder Timer Weekly",
-    description: "Weekly access to unlimited parking timers, meter alerts, find-car notes, and ticket-free streak sharing."
+    description: "Timers, alerts, find-car notes, streak cards."
   },
   {
     product_id: "parking_reminder_timer_annual",
     reference_name: "Parking Reminder Timer Annual",
     duration: "1y",
-    trial: "1w",
-    tier: 40,
+    trial: nil,
+    tier: 177,
     name: "Parking Reminder Timer Annual",
-    description: "Annual access to unlimited parking timers, meter alerts, find-car notes, and ticket-free streak sharing with a 7-day free trial."
+    description: "Lower yearly price for timers and alerts."
   }
 ].freeze
 

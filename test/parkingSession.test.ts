@@ -7,7 +7,10 @@ import {
   formatCountdown,
   getMascotMood,
   getProgress,
+  hasFreeTrial,
   packageIdForPlan,
+  planForFreeTrialPreference,
+  priceLabelForPlan,
   productIdForPlan,
   REVENUECAT_OFFERING_ID,
 } from '../src/parkingSession';
@@ -54,4 +57,16 @@ test('keeps RevenueCat offering and package identifiers stable', () => {
   assert.equal(REVENUECAT_OFFERING_ID, 'parking_timer_default');
   assert.equal(packageIdForPlan('weekly'), '$rc_weekly');
   assert.equal(packageIdForPlan('annual'), '$rc_annual');
+});
+
+test('maps free trial toggle to weekly plan only', () => {
+  assert.equal(planForFreeTrialPreference(true), 'weekly');
+  assert.equal(planForFreeTrialPreference(false), 'annual');
+  assert.equal(hasFreeTrial('weekly'), true);
+  assert.equal(hasFreeTrial('annual'), false);
+});
+
+test('keeps weekly higher and annual lower to nudge annual choice', () => {
+  assert.equal(priceLabelForPlan('weekly'), '$4.99 / week');
+  assert.equal(priceLabelForPlan('annual'), '$19.99 / year');
 });

@@ -18,6 +18,11 @@ test('web app starts a parking session and opens the paywall', { skip: !appUrl }
     await page.getByText('Unlock Pro').click();
     await assertText(page, 'Parking Pro');
     await assertText(page, '7-day free trial');
+    await assertText(page, '$4.99 / week');
+    await page.getByLabel('Free trial').click();
+    await assertText(page, 'Annual selected at the lowest yearly price');
+    await assertText(page, '$19.99 / year');
+    await assertText(page, 'Continue annual');
     await page.screenshot({ path: 'artifacts/browser-smoke.png', fullPage: true });
   } finally {
     await browser.close();

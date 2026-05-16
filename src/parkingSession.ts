@@ -22,6 +22,8 @@ export type StreakState = {
 export const WEEKLY_PRODUCT_ID = 'parking_reminder_timer_weekly';
 export const ANNUAL_PRODUCT_ID = 'parking_reminder_timer_annual';
 export const REVENUECAT_OFFERING_ID = 'parking_timer_default';
+export const WEEKLY_PRICE_LABEL = '$4.99 / week';
+export const ANNUAL_PRICE_LABEL = '$19.99 / year';
 
 export function createParkingSession(input: ParkingSessionInput): ParkingSession {
   const safeDuration = Math.max(5, Math.min(24 * 60, Math.round(input.durationMinutes)));
@@ -96,10 +98,22 @@ export function packageIdForPlan(plan: ParkingPlan): string {
   return plan === 'annual' ? '$rc_annual' : '$rc_weekly';
 }
 
+export function hasFreeTrial(plan: ParkingPlan): boolean {
+  return plan === 'weekly';
+}
+
+export function planForFreeTrialPreference(wantsFreeTrial: boolean): ParkingPlan {
+  return wantsFreeTrial ? 'weekly' : 'annual';
+}
+
+export function priceLabelForPlan(plan: ParkingPlan): string {
+  return plan === 'annual' ? ANNUAL_PRICE_LABEL : WEEKLY_PRICE_LABEL;
+}
+
 export function proFeaturesForPlan(plan: ParkingPlan): string[] {
   const shared = ['Unlimited parking sessions', 'Smart pre-expiry alerts', 'Ticket-free streak cards'];
-  if (plan === 'annual') {
-    return ['7-day free trial', 'Best value for regular city parking', ...shared];
+  if (hasFreeTrial(plan)) {
+    return ['7-day free trial', 'Flexible weekly access', ...shared];
   }
-  return ['Flexible weekly access', ...shared];
+  return ['Best annual price for regular city parking', ...shared];
 }

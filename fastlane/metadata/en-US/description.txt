@@ -12,6 +12,6 @@ Pro features:
 - Unlimited parking sessions
 - Smart pre-expiry reminder presets
 - Rich ticket-free streak cards
-- Annual plan with a 7-day free trial
+- Weekly plan with a 7-day free trial and lower annual price
 
 Parking Reminder Timer does not pay for parking, reserve parking, or guarantee that users avoid fines. It helps users save their own timer and reminder information.

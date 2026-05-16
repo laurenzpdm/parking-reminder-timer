@@ -31,6 +31,9 @@ import {
   getMascotMood,
   getProgress,
   getRemainingMs,
+  hasFreeTrial,
+  planForFreeTrialPreference,
+  priceLabelForPlan,
   proFeaturesForPlan,
   productIdForPlan,
 } from './src/parkingSession';
@@ -58,7 +61,8 @@ export default function App() {
   const [duration, setDuration] = useState('90');
   const [spotNote, setSpotNote] = useState('Level 3, blue elevator');
   const [now, setNow] = useState(Date.now());
-  const [selectedPlan, setSelectedPlan] = useState<ParkingPlan>('annual');
+  const [freeTrialEnabled, setFreeTrialEnabled] = useState(true);
+  const [selectedPlan, setSelectedPlan] = useState<ParkingPlan>(planForFreeTrialPreference(true));
   const [paywallOpen, setPaywallOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const shareCardRef = useRef<View>(null);
@@ -103,6 +107,16 @@ export default function App() {
   }, [remainingMs, state.session]);
 
   const proFeatures = useMemo(() => proFeaturesForPlan(selectedPlan), [selectedPlan]);
+
+  function chooseFreeTrial(enabled: boolean) {
+    setFreeTrialEnabled(enabled);
+    setSelectedPlan(planForFreeTrialPreference(enabled));
+  }
+
+  function choosePlan(plan: ParkingPlan) {
+    setSelectedPlan(plan);
+    setFreeTrialEnabled(hasFreeTrial(plan));
+  }
 
   async function startSession() {
     const requestedMinutes = Number.parseInt(duration, 10);
@@ -307,15 +321,42 @@ export default function App() {
           <View style={styles.paywall}>
             <Text style={styles.panelTitle}>Parking Pro</Text>
             <Text style={styles.paywallCopy}>Unlimited sessions, smarter reminders, and share-ready ticket-free wins.</Text>
+            <View style={styles.trialToggleRow}>
+              <View style={styles.trialToggleCopy}>
+                <Text style={styles.trialToggleTitle}>Free trial</Text>
+                <Text style={styles.trialToggleSubtitle}>{freeTrialEnabled ? 'Weekly selected with 7 days free' : 'Annual selected at the lowest yearly price'}</Text>
+              </View>
+              <Pressable
+                accessibilityRole="switch"
+                accessibilityState={{ checked: freeTrialEnabled }}
+                accessibilityLabel="Free trial"
+                onPress={() => chooseFreeTrial(!freeTrialEnabled)}
+                style={[styles.toggleTrack, freeTrialEnabled && styles.toggleTrackActive]}
+              >
+                <View style={[styles.toggleThumb, freeTrialEnabled && styles.toggleThumbActive]} />
+              </Pressable>
+            </View>
             <View style={styles.planRow}>
-              <PlanButton selected={selectedPlan === 'annual'} title="Annual" subtitle="7-day free trial" onPress={() => setSelectedPlan('annual')} />
-              <PlanButton selected={selectedPlan === 'weekly'} title="Weekly" subtitle="No trial" onPress={() => setSelectedPlan('weekly')} />
+              <PlanButton
+                selected={selectedPlan === 'weekly'}
+                title="Weekly"
+                price={priceLabelForPlan('weekly')}
+                subtitle="7-day free trial"
+                onPress={() => choosePlan('weekly')}
+              />
+              <PlanButton
+                selected={selectedPlan === 'annual'}
+                title="Annual"
+                price={priceLabelForPlan('annual')}
+                subtitle="Lower yearly price"
+                onPress={() => choosePlan('annual')}
+              />
             </View>
             {proFeatures.map((feature) => (
               <Text key={feature} style={styles.feature}>- {feature}</Text>
             ))}
             <Pressable disabled={busy} style={styles.primaryButton} onPress={buySelectedPlan}>
-              <Text style={styles.primaryButtonText}>{busy ? 'Working...' : selectedPlan === 'annual' ? 'Start 7-day free trial' : 'Continue weekly'}</Text>
+              <Text style={styles.primaryButtonText}>{busy ? 'Working...' : hasFreeTrial(selectedPlan) ? 'Start 7-day free trial' : 'Continue annual'}</Text>
             </Pressable>
             <Pressable disabled={busy} onPress={restorePurchases}>
               <Text style={styles.link}>Restore purchases</Text>
@@ -331,10 +372,11 @@ export default function App() {
   );
 }
 
-function PlanButton({ selected, title, subtitle, onPress }: { selected: boolean; title: string; subtitle: string; onPress: () => void }) {
+function PlanButton({ selected, title, price, subtitle, onPress }: { selected: boolean; title: string; price: string; subtitle: string; onPress: () => void }) {
   return (
     <Pressable onPress={onPress} style={[styles.planButton, selected && styles.planButtonSelected]}>
       <Text style={[styles.planTitle, selected && styles.planTitleSelected]}>{title}</Text>
+      <Text style={[styles.planPrice, selected && styles.planTitleSelected]}>{price}</Text>
       <Text style={[styles.planSubtitle, selected && styles.planTitleSelected]}>{subtitle}</Text>
     </Pressable>
   );
@@ -386,10 +428,19 @@ const styles = StyleSheet.create({
   shareCaption: { color: '#d7edf0', fontSize: 14 },
   paywall: { backgroundColor: '#ffffff', borderRadius: 8, padding: 16, gap: 12, shadowColor: '#0d3040', shadowOpacity: 0.08, shadowRadius: 18 },
   paywallCopy: { color: '#5c7180', fontSize: 15, lineHeight: 21 },
+  trialToggleRow: { borderRadius: 8, borderWidth: 1, borderColor: '#d5e8ea', backgroundColor: '#f7fbff', padding: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
+  trialToggleCopy: { flex: 1, gap: 2 },
+  trialToggleTitle: { color: '#102f3a', fontSize: 15, fontWeight: '900' },
+  trialToggleSubtitle: { color: '#5c7180', fontSize: 12, fontWeight: '700', lineHeight: 17 },
+  toggleTrack: { width: 54, height: 32, borderRadius: 16, padding: 3, backgroundColor: '#d5e8ea', justifyContent: 'center' },
+  toggleTrackActive: { backgroundColor: '#90eee7' },
+  toggleThumb: { width: 26, height: 26, borderRadius: 13, backgroundColor: '#ffffff', shadowColor: '#0d3040', shadowOpacity: 0.16, shadowRadius: 5 },
+  toggleThumbActive: { transform: [{ translateX: 22 }], backgroundColor: '#0f9b91' },
   planRow: { flexDirection: 'row', gap: 10 },
   planButton: { flex: 1, borderRadius: 8, borderWidth: 1, borderColor: '#d5e8ea', padding: 12, backgroundColor: '#f7fbff' },
   planButtonSelected: { borderColor: '#102f3a', backgroundColor: '#e8f8f6' },
   planTitle: { color: '#102f3a', fontSize: 16, fontWeight: '900' },
+  planPrice: { color: '#102f3a', fontSize: 15, fontWeight: '900', marginTop: 6 },
   planSubtitle: { color: '#5c7180', fontSize: 12, fontWeight: '700', marginTop: 2 },
   planTitleSelected: { color: '#102f3a' },
   feature: { color: '#334b55', fontSize: 14, lineHeight: 20 },

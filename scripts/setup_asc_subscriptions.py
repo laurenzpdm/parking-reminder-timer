@@ -21,7 +21,9 @@ PRODUCTS = [
         "period": "ONE_WEEK",
         "group_level": 2,
         "name": "Parking Reminder Timer Weekly",
-        "description": "Unlimited parking timers, meter alerts, find-car notes, and ticket-free streak sharing.",
+        "price": "4.99",
+        "trial": "ONE_WEEK",
+        "description": "Timers, alerts, find-car notes, streak cards.",
     },
     {
         "product_id": "parking_reminder_timer_annual",
@@ -29,7 +31,9 @@ PRODUCTS = [
         "period": "ONE_YEAR",
         "group_level": 1,
         "name": "Parking Reminder Timer Annual",
-        "description": "Unlimited parking timers, meter alerts, find-car notes, and ticket-free streak sharing with a 7-day free trial.",
+        "price": "19.99",
+        "trial": None,
+        "description": "Lower yearly price for timers and alerts.",
     },
 ]
 
@@ -82,6 +86,12 @@ class AscClient:
             raise RuntimeError(f"POST {path} failed: {response.status_code} {response.text}")
         return response.json()
 
+    def patch(self, path: str, body: dict[str, Any]) -> dict[str, Any]:
+        response = self.client.patch(path, json=body)
+        if not response.is_success:
+            raise RuntimeError(f"PATCH {path} failed: {response.status_code} {response.text}")
+        return response.json()
+
 
 def find_group(client: AscClient) -> dict[str, Any] | None:
     groups = client.get(f"apps/{APP_ID}/subscriptionGroups", {"limit": 50}).get("data", [])
@@ -125,6 +135,21 @@ def find_subscription(client: AscClient, group_id: str, product_id: str) -> dict
 def ensure_subscription(client: AscClient, group_id: str, product: dict[str, Any]) -> dict[str, Any]:
     sub = find_subscription(client, group_id, product["product_id"])
     if sub:
+        client.patch(
+            f"subscriptions/{sub['id']}",
+            {
+                "data": {
+                    "type": "subscriptions",
+                    "id": sub["id"],
+                    "attributes": {
+                        "name": product["reference_name"],
+                        "familySharable": False,
+                        "groupLevel": product["group_level"],
+                        "reviewNote": "No login is required. The subscription unlocks unlimited parking reminder sessions, smart meter alerts, find-car notes, and ticket-free streak sharing.",
+                    },
+                }
+            },
+        )
         return sub
 
     body = {
@@ -149,7 +174,18 @@ def ensure_subscription(client: AscClient, group_id: str, product: dict[str, Any
 
 def ensure_localization(client: AscClient, subscription_id: str, product: dict[str, Any]) -> None:
     existing = client.get(f"subscriptions/{subscription_id}/subscriptionLocalizations", {"limit": 50}).get("data", [])
-    if any(item["attributes"].get("locale") == "en-US" for item in existing):
+    current = next((item for item in existing if item["attributes"].get("locale") == "en-US"), None)
+    if current:
+        client.patch(
+            f"subscriptionLocalizations/{current['id']}",
+            {
+                "data": {
+                    "type": "subscriptionLocalizations",
+                    "id": current["id"],
+                    "attributes": {"name": product["name"], "description": product["description"]},
+                }
+            },
+        )
         return
     client.post(
         "subscriptionLocalizations",
@@ -167,6 +203,78 @@ def ensure_localization(client: AscClient, subscription_id: str, product: dict[s
     )
 
 
+def ensure_introductory_offer(client: AscClient, subscription_id: str, product: dict[str, Any]) -> None:
+    existing = client.get(f"subscriptions/{subscription_id}/introductoryOffers", {"limit": 50}).get("data", [])
+    has_week_trial = any(
+        item["attributes"].get("offerMode") == "FREE_TRIAL" and item["attributes"].get("duration") == product["trial"]
+        for item in existing
+    )
+    if product["trial"] and not has_week_trial:
+        client.post(
+            "subscriptionIntroductoryOffers",
+            {
+                "data": {
+                    "type": "subscriptionIntroductoryOffers",
+                    "attributes": {
+                        "duration": product["trial"],
+                        "offerMode": "FREE_TRIAL",
+                        "numberOfPeriods": 1,
+                    },
+                    "relationships": {
+                        "subscription": {"data": {"type": "subscriptions", "id": subscription_id}},
+                        "territory": {"data": {"type": "territories", "id": "USA"}},
+                    },
+                }
+            },
+        )
+
+
+def ensure_availability(client: AscClient, subscription_id: str) -> None:
+    body = {
+        "data": {
+            "type": "subscriptionAvailabilities",
+            "attributes": {"availableInNewTerritories": True},
+            "relationships": {
+                "availableTerritories": {"data": [{"type": "territories", "id": "USA"}]},
+                "subscription": {"data": {"type": "subscriptions", "id": subscription_id}},
+            },
+        }
+    }
+    client.post("subscriptionAvailabilities", body)
+
+
+def price_point_for(client: AscClient, subscription_id: str, target_price: str) -> str | None:
+    next_url: str | None = f"subscriptions/{subscription_id}/pricePoints"
+    params: dict[str, Any] | None = {"filter[territory]": "USA", "limit": 200}
+    while next_url:
+        response = client.client.get(next_url, params=params)
+        response.raise_for_status()
+        payload = response.json()
+        for item in payload.get("data", []):
+            if item["attributes"].get("customerPrice") == target_price:
+                return item["id"]
+        next_url = payload.get("links", {}).get("next")
+        params = None
+    return None
+
+
+def ensure_price(client: AscClient, subscription_id: str, product: dict[str, Any]) -> None:
+    price_point_id = price_point_for(client, subscription_id, product["price"])
+    if not price_point_id:
+        raise RuntimeError(f"Could not find USA price point {product['price']} for {product['product_id']}")
+    body = {
+        "data": {
+            "type": "subscriptionPrices",
+            "attributes": {"preserveCurrentPrice": False},
+            "relationships": {
+                "subscription": {"data": {"type": "subscriptions", "id": subscription_id}},
+                "subscriptionPricePoint": {"data": {"type": "subscriptionPricePoints", "id": price_point_id}},
+            },
+        }
+    }
+    client.post("subscriptionPrices", body)
+
+
 def main() -> None:
     client = AscClient()
     group = ensure_group(client)
@@ -174,6 +282,9 @@ def main() -> None:
     for product in PRODUCTS:
         sub = ensure_subscription(client, group["id"], product)
         ensure_localization(client, sub["id"], product)
+        ensure_availability(client, sub["id"])
+        ensure_price(client, sub["id"], product)
+        ensure_introductory_offer(client, sub["id"], product)
         print(f"{product['product_id']}={sub['id']}")
 
 
