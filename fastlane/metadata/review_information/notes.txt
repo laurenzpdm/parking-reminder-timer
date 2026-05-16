@@ -1,0 +1,1 @@
+The app helps users create parking timers and reminders. It does not pay for parking or reserve parking. Subscription testing can use the App Store sandbox. Annual Pro has a 7-day free trial; Weekly Pro has no trial.

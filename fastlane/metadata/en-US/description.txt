@@ -1,0 +1,17 @@
+Parking Reminder Timer helps you avoid stressful meter surprises. Start a parking session in seconds, save a note about your spot, get clear time-left reminders, and find your way back to the car faster.
+
+The app is built for real parking moments, not complicated planning. Open it when you park, choose the time on the meter, add a quick note, and let the friendly meter companion keep watch.
+
+Free features:
+- Quick parking timer
+- Spot note and location label
+- Ticket-free streak tracking
+- Shareable streak moment
+
+Pro features:
+- Unlimited parking sessions
+- Smart pre-expiry reminder presets
+- Rich ticket-free streak cards
+- Annual plan with a 7-day free trial
+
+Parking Reminder Timer does not pay for parking, reserve parking, or guarantee that users avoid fines. It helps users save their own timer and reminder information.
