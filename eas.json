@@ -9,6 +9,7 @@
         "resourceClass": "m-medium"
       },
       "autoIncrement": true,
+      "credentialsSource": "local",
       "distribution": "store"
     },
     "simulator": {
