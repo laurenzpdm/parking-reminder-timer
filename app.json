@@ -36,7 +36,11 @@
       "revenueCatEntitlement": "pro",
       "revenueCatOffering": "parking_timer_default",
       "weeklyProductId": "parking_reminder_timer_weekly",
-      "annualProductId": "parking_reminder_timer_annual"
-    }
+      "annualProductId": "parking_reminder_timer_annual",
+      "eas": {
+        "projectId": "7ebec155-f7cd-41f4-8c98-6ab034e1e2c0"
+      }
+    },
+    "owner": "max102029"
   }
 }
