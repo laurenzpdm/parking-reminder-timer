@@ -15,8 +15,8 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.thuemmlerai.parkingremindertimer",
-      "buildNumber": "1",
       "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
         "NSLocationWhenInUseUsageDescription": "Parking Reminder Timer can save your current spot so you can find your parked car again.",
         "NSUserNotificationsUsageDescription": "Parking Reminder Timer sends alerts before your meter expires."
       }
