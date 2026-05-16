@@ -22,6 +22,7 @@ import { captureRef } from 'react-native-view-shot';
 import {
   ParkingPlan,
   ParkingSession,
+  REVENUECAT_OFFERING_ID,
   StreakState,
   addMinutes,
   completeSession,
@@ -154,8 +155,8 @@ export default function App() {
         const Purchases = await import('react-native-purchases');
         Purchases.default.configure({ apiKey: process.env.EXPO_PUBLIC_REVENUECAT_IOS_KEY });
         const offerings = await Purchases.default.getOfferings();
-        const current = offerings.current;
-        const pkg = current?.availablePackages.find((item) => item.product.identifier === productId);
+        const parkingOffering = offerings.all[REVENUECAT_OFFERING_ID] ?? offerings.current;
+        const pkg = parkingOffering?.availablePackages.find((item) => item.product.identifier === productId);
         if (!pkg) throw new Error(`RevenueCat package missing for ${productId}`);
         await Purchases.default.purchasePackage(pkg);
       }

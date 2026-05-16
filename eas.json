@@ -1,0 +1,30 @@
+{
+  "cli": {
+    "version": ">= 18.5.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "production": {
+      "ios": {
+        "resourceClass": "m-medium"
+      },
+      "autoIncrement": true,
+      "distribution": "store"
+    },
+    "simulator": {
+      "ios": {
+        "simulator": true
+      },
+      "distribution": "internal"
+    }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "appleId": "maximilian.thuemmler@gmail.com",
+        "ascAppId": "6770088501",
+        "appleTeamId": "2M7S4N5A4L"
+      }
+    }
+  }
+}

@@ -7,7 +7,9 @@ import {
   formatCountdown,
   getMascotMood,
   getProgress,
+  packageIdForPlan,
   productIdForPlan,
+  REVENUECAT_OFFERING_ID,
 } from '../src/parkingSession';
 
 test('creates a bounded parking session with a warning before expiry', () => {
@@ -46,4 +48,10 @@ test('maps mascot mood and plan ids', () => {
   assert.equal(getMascotMood(session, 11 * 60_000, { ticketFreeDays: 0, sessionsCompleted: 0 }), 'watching');
   assert.equal(getMascotMood(null, 0, { ticketFreeDays: 7, sessionsCompleted: 7 }), 'proud');
   assert.equal(productIdForPlan('annual'), 'parking_reminder_timer_annual');
+});
+
+test('keeps RevenueCat offering and package identifiers stable', () => {
+  assert.equal(REVENUECAT_OFFERING_ID, 'parking_timer_default');
+  assert.equal(packageIdForPlan('weekly'), '$rc_weekly');
+  assert.equal(packageIdForPlan('annual'), '$rc_annual');
 });

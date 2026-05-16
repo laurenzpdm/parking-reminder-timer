@@ -21,6 +21,7 @@ export type StreakState = {
 
 export const WEEKLY_PRODUCT_ID = 'parking_reminder_timer_weekly';
 export const ANNUAL_PRODUCT_ID = 'parking_reminder_timer_annual';
+export const REVENUECAT_OFFERING_ID = 'parking_timer_default';
 
 export function createParkingSession(input: ParkingSessionInput): ParkingSession {
   const safeDuration = Math.max(5, Math.min(24 * 60, Math.round(input.durationMinutes)));
@@ -89,6 +90,10 @@ export function getMascotMood(session: ParkingSession | null, now: number, strea
 
 export function productIdForPlan(plan: ParkingPlan): string {
   return plan === 'annual' ? ANNUAL_PRODUCT_ID : WEEKLY_PRODUCT_ID;
+}
+
+export function packageIdForPlan(plan: ParkingPlan): string {
+  return plan === 'annual' ? '$rc_annual' : '$rc_weekly';
 }
 
 export function proFeaturesForPlan(plan: ParkingPlan): string[] {

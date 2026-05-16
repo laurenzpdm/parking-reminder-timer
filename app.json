@@ -34,6 +34,7 @@
     },
     "extra": {
       "revenueCatEntitlement": "pro",
+      "revenueCatOffering": "parking_timer_default",
       "weeklyProductId": "parking_reminder_timer_weekly",
       "annualProductId": "parking_reminder_timer_annual"
     }
